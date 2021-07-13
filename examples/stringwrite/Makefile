@@ -26,11 +26,14 @@ all: $(subdirs)
 .PHONY: $(subdirs) hw
 
 hw:
-	echo "INFO: Creating Fletcher hardware symlinks."
+	echo "INFO: Generating Fletcher stringwrite example design..."
 	rm -f ./hw/fletcher
 	rm -f ./hw/stringwrite
 	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
 	ln -fs $(FLETCHER_DIR)/examples/stringwrite/hardware ./hw/stringwrite
+	cd ./hw/stringwrite && python3 generate-schema.py && \
+fletchgen -i stringwrite.as -t memory.srec -l vhdl dot --axi --regs c:32:strlen_min c:32:strlen_mask
+
 
 $(subdirs):
 	@if [ -d $@ -a -f $@/Makefile ]; then			\
