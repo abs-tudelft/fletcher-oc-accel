@@ -31,7 +31,7 @@ hw:
 	rm -f ./hw/stringwrite
 	ln -fs $(FLETCHER_DIR)/hardware ./hw/fletcher
 	ln -fs $(FLETCHER_DIR)/examples/stringwrite/hardware ./hw/stringwrite
-	cd ./hw/stringwrite && python3 generate-schema.py && \
+	cd ./hw/stringwrite && python3 generate-input.py && \
 fletchgen -i stringwrite.as -t memory.srec -l vhdl dot --axi --regs c:32:strlen_min c:32:strlen_mask
 
 
