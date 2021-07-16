@@ -24,6 +24,7 @@ use ieee.numeric_std.all;
 
 library work;
 use work.Axi_pkg.all;
+use work.Axitop_pkg.all;
 use work.UtilInt_pkg.all;
 use work.UtilConv_pkg.all;
 use work.UtilMisc_pkg.all;
