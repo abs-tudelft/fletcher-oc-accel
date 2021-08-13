@@ -38,23 +38,6 @@ index 976cbf5..dc55010 100644
  
            -- pragma translate_on
 
-diff --git a/examples/sum/hardware/vhdl/Sum.vhd b/examples/sum/hardware/vhdl/Sum.vhd
-index 8b878b9..abee117 100644
---- a/examples/sum/hardware/vhdl/Sum.vhd
-+++ b/examples/sum/hardware/vhdl/Sum.vhd
-@@ -80,7 +80,10 @@ begin
-   -- (registers).
-   
-   -- Combinatorial part:
--  combinatorial_proc : process (all) is 
-+  combinatorial_proc : process (ExampleBatch_number, ExampleBatch_number_last, 
-+ExampleBatch_number_valid, accumulator, ExampleBatch_firstIdx, 
-+ExampleBatch_lastIdx, state, start, reset, ExampleBatch_number_cmd_ready, 
-+ExampleBatch_number_unl_valid) is 
-   begin
-     
-     -- We first determine the default outputs of our combinatorial circuit.
-     
 diff --git a/stream/StreamPipelineControl.vhd b/stream/StreamPipelineControl.vhd
 index 034643a..cefce8b 100644
 --- a/stream/StreamPipelineControl.vhd
