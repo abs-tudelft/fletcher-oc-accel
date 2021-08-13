@@ -73,6 +73,9 @@
 /* Burst step length in bytes */
 #define BURST_LENGTH    64
 
+/* Alignment for buffers in bytes */
+#define ALIGNMENT    4096
+
 
 #endif	/* __SNAP_FW_EXA__ */
 

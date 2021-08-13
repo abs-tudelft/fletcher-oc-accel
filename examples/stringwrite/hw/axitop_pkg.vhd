@@ -20,16 +20,14 @@ use ieee.std_logic_misc.all;
 package Axitop_pkg is
   component AxiTop is
     generic (
-      INDEX_WIDTH                 : natural;
-      REG_WIDTH                   : natural;
-      TAG_WIDTH                   : natural;
-      BUS_ADDR_WIDTH              : natural;
-      BUS_DATA_WIDTH              : natural;
-      BUS_LEN_WIDTH               : natural;
-      BUS_BURST_MAX_LEN           : natural;
-      BUS_BURST_STEP_LEN          : natural;
-      MMIO_ADDR_WIDTH             : natural;
-      MMIO_DATA_WIDTH             : natural
+    INDEX_WIDTH                 : natural := 32;
+    REG_WIDTH                   : natural := 32;
+    TAG_WIDTH                   : natural := 1;
+    BUS_ADDR_WIDTH              : natural := 64;
+    BUS_DATA_WIDTH              : natural := 512;
+    BUS_LEN_WIDTH               : natural := 8;
+    BUS_BURST_MAX_LEN           : natural := 64;
+    BUS_BURST_STEP_LEN          : natural := 1
     );
     port (
       kcd_clk                     : in  std_logic;
@@ -56,22 +54,25 @@ package Axitop_pkg is
       m_axi_wdata                 : out std_logic_vector(BUS_DATA_WIDTH-1 downto 0);
       m_axi_wlast                 : out std_logic;
       m_axi_wstrb                 : out std_logic_vector(BUS_DATA_WIDTH/8-1 downto 0);
+      m_axi_bvalid                : in  std_logic;
+      m_axi_bready                : out std_logic;
+      m_axi_bresp                 : in  std_logic_vector(1 downto 0);
       s_axi_awvalid               : in std_logic;
       s_axi_awready               : out std_logic;
-      s_axi_awaddr                : in std_logic_vector(MMIO_ADDR_WIDTH-1 downto 0);
+      s_axi_awaddr                : in std_logic_vector(32-1 downto 0);
       s_axi_wvalid                : in std_logic;
       s_axi_wready                : out std_logic;
-      s_axi_wdata                 : in std_logic_vector(MMIO_DATA_WIDTH-1 downto 0);
-      s_axi_wstrb                 : in std_logic_vector((MMIO_DATA_WIDTH/8)-1 downto 0);
+      s_axi_wdata                 : in std_logic_vector(32-1 downto 0);
+      s_axi_wstrb                 : in std_logic_vector((32/8)-1 downto 0);
       s_axi_bvalid                : out std_logic;
       s_axi_bready                : in std_logic;
       s_axi_bresp                 : out std_logic_vector(1 downto 0);
       s_axi_arvalid               : in std_logic;
       s_axi_arready               : out std_logic;
-      s_axi_araddr                : in std_logic_vector(MMIO_ADDR_WIDTH-1 downto 0);
+      s_axi_araddr                : in std_logic_vector(32-1 downto 0);
       s_axi_rvalid                : out std_logic;
       s_axi_rready                : in std_logic;
-      s_axi_rdata                 : out std_logic_vector(MMIO_DATA_WIDTH-1 downto 0);
+      s_axi_rdata                 : out std_logic_vector(32-1 downto 0);
       s_axi_rresp                 : out std_logic_vector(1 downto 0)
     );
   end component;

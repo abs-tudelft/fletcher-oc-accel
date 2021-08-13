@@ -14,11 +14,6 @@
 # limitations under the License.
 #
 
-# Make sure Fletcher environment variable is set.
-ifndef FLETCHER_DIR
-$(error FLETCHER_DIR is not set)
-endif
-
 subdirs += hw
 
 all: $(subdirs)

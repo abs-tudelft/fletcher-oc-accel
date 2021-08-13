@@ -14,6 +14,8 @@
 # limitations under the License.
 #
 
+FLETCHER_DIR=$(shell pwd)/../../../fletcher
+
 vhd_srcs=$(wildcard *.vhd_source)
 vhd_files=$(vhd_srcs:.vhd_source=.vhd)
 

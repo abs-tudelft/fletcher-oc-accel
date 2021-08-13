@@ -97,7 +97,7 @@ int allocate_buffers(uint32_t **off_buf, char **val_buf, int num_strings, int st
   int rc;
   // Create offsets buffer
   LOG("Allocating %lu for offsets buffer.\n", sizeof(uint32_t) * (num_strings + 1));
-  rc = posix_memalign((void **) off_buf, BURST_LENGTH, sizeof(uint32_t) * (num_strings + 1));
+  rc = posix_memalign((void **) off_buf, ALIGNMENT, sizeof(uint32_t) * (num_strings + 1));
   // Clear offset buffer
   for (uint32_t i = 0; i < num_strings + 1; i++) {
     (*off_buf)[i] = 0xDEADBEEF;
@@ -105,7 +105,7 @@ int allocate_buffers(uint32_t **off_buf, char **val_buf, int num_strings, int st
   // Create value buffer
   uint32_t num_chars = strlen_max * num_strings;
   LOG("Allocated %lu for values buffer.\n", sizeof(char) * num_chars);
-  rc = posix_memalign((void **) val_buf, BURST_LENGTH, sizeof(char) * num_chars);
+  rc = posix_memalign((void **) val_buf, ALIGNMENT, sizeof(char) * num_chars);
   // Clear values buffer
   for (uint32_t i = 0; i < num_chars; i++) {
     (*val_buf)[i] = '\0';

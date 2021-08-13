@@ -301,9 +301,6 @@ begin
   s_axi_host_mem_rid      <= axi_host_mem_rid;
   s_axi_host_mem_ruser    <= axi_host_mem_ruser;
 
-  -- Signal our AXI master is always ready for a write response
-  s_axi_host_mem_bready <= '1';
-
   ----------------------------------------------------------------------
   -- AXI Lite Slave inputs
   ----------------------------------------------------------------------
@@ -471,9 +468,7 @@ begin
       BUS_DATA_WIDTH            => 512,
       BUS_LEN_WIDTH             => 8,
       BUS_BURST_MAX_LEN         => 64,
-      BUS_BURST_STEP_LEN        => 1,
-      MMIO_ADDR_WIDTH           => 32,
-      MMIO_DATA_WIDTH           => 32
+      BUS_BURST_STEP_LEN        => 1
     )
     port map (
       kcd_clk                   => action_clk,
@@ -501,6 +496,9 @@ begin
       m_axi_wdata               => s_axi_host_mem_wdata,
       m_axi_wlast               => s_axi_host_mem_wlast,
       m_axi_wstrb               => s_axi_host_mem_wstrb,
+      m_axi_bvalid              => s_axi_host_mem_bvalid,
+      m_axi_bresp               => s_axi_host_mem_bresp,
+      m_axi_bready              => s_axi_host_mem_bready,
       s_axi_awvalid             => fletcher_s_axi_awvalid,
       s_axi_awready             => fletcher_s_axi_awready,
       s_axi_awaddr              => fletcher_s_axi_awaddr,
