@@ -1,15 +1,3 @@
-# fletcher-snap
-
-[![Build Status](https://dev.azure.com/abs-tudelft/fletcher/_apis/build/status/abs-tudelft.fletcher-snap?branchName=master)](https://dev.azure.com/abs-tudelft/fletcher/_build/latest?definitionId=6&branchName=master)
-
-Fletcher oc-accel platform support.
-
-This platform has been derived from https://github.com/abs-tudelft/fletcher-snap, much like oc-accel is the successor of SNAP (SNAP = CAPI 1.0 and 2.0, ocxl aka. oc-accel is OpenCAPI 3.0).
-
-As this repo contains only the needed platform support, the main fletcher library is needed for all the platform-agnostic parts (including VHDL code, common runtime library, example hardware and software code). That repo is included as a git submodule, but you can also check it out elsewhere yourself. In that case, you need to make sure that the FLETCHER_DIR, to be set in oc-accel/env.sh, points to it.
-
-Platform-specific changes needed in fletcher itself (patch):
-```
 diff --git a/hardware/interconnect/BusReadBuffer.vhd b/hardware/interconnect/BusReadBuffer.vhd
 index 976cbf5..dc55010 100644
 --- a/hardware/interconnect/BusReadBuffer.vhd
@@ -38,7 +26,7 @@ index 976cbf5..dc55010 100644
  
            -- pragma translate_on
 
-diff --git a/hardware/vhlib/stream/StreamPipelineControl.vhd b/stream/StreamPipelineControl.vhd
+diff --git a/hardware/vhlib/stream/StreamPipelineControl.vhd b/hardware/vhlib/stream/StreamPipelineControl.vhd
 index 034643a..cefce8b 100644
 --- a/hardware/vhlib/stream/StreamPipelineControl.vhd
 +++ b/hardware/vhlib/stream/StreamPipelineControl.vhd
@@ -57,6 +45,3 @@ index 034643a..cefce8b 100644
              fifo_reserved_v := fifo_reserved_v - 1;
          end if;
          fifo_reserved <= fifo_reserved_v;
-```
-
-Important: When you wish to run one of the examples, you will need to run `make` in the corresponding example directory in the fletcher directory. In addition, you need to add the flag `--axi` to the `fletchgen` command in the hw Makefile. Otherwise, the AxiTop file is not generated and will remain a black box. This is not an error for oc-accel so it will crash (hang) the ocse simulation without notice.
