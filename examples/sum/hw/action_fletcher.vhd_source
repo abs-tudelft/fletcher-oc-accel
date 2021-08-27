@@ -467,10 +467,13 @@ begin
   ----------------------------------------------------------------------
   fletcher_axi_top_inst : AxiTop
     generic map (
+      INDEX_WIDTH               => 32,
+      REG_WIDTH                 => 32,
+      TAG_WIDTH                 => 1,
       BUS_ADDR_WIDTH            => 64,
-      BUS_DATA_WIDTH            => 512,
+      BUS_DATA_WIDTH            => C_AXI_HOST_MEM_DATA_WIDTH,
       BUS_LEN_WIDTH             => 8,
-      BUS_BURST_MAX_LEN         => 64,
+      BUS_BURST_MAX_LEN         => 128,
       BUS_BURST_STEP_LEN        => 1
     )
     port map (
