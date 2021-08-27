@@ -182,28 +182,22 @@ architecture Behavorial of action_fletcher is
   signal s_axi_host_mem_ruser    : std_logic_vector(C_AXI_HOST_MEM_RUSER_WIDTH-1 downto 0);
   signal s_axi_host_mem_wuser    : std_logic_vector(C_AXI_HOST_MEM_WUSER_WIDTH-1 downto 0);
 
-  -----------------------------------
-  -- SNAP registers
-  -----------------------------------
-  --   1 control (uint32_t)     =  1
-  --   1 interrupt enable       =  1
-  --   1 type                   =  1
-  --   1 version                =  1
-  --   1 context id             =  1
-  -----------------------------------
-  -- SNAP Total:                   5 regs
 
-  constant SNAP_NUM_REGS        : natural := 9;
-  constant SNAP_ADDR_WIDTH      : natural := 2 + log2floor(SNAP_NUM_REGS);
+  -- https://opencapi.github.io/oc-accel-doc/deep-dive/registers/
+  -- SNAP registers 0x00 -> 0x30
+  constant SNAP_NUM_RESERVED_SPACE        : natural := 64;
+  -- The address with is: 2 - for byte offset + log2 of the number of reserved registers.
+  constant SNAP_ADDR_WIDTH      : natural := log2ceil(SNAP_NUM_RESERVED_SPACE);
 
   -- SNAP register offsets
   constant SNAP_REG_CONTROL          : natural := 0;
   constant SNAP_REG_INTERRUPT_ENABLE : natural := 1;
   constant SNAP_REG_TYPE             : natural := 4;
   constant SNAP_REG_VERSION          : natural := 5;
-  constant SNAP_REG_CONTEXT_ID       : natural := 8;
+  constant SNAP_REG_ISL              : natural := 6;
+  constant SNAP_REG_ISH              : natural := 7;
 
-  type snap_regs_t is array (0 to SNAP_NUM_REGS-1) of std_logic_vector(C_AXI_CTRL_REG_DATA_WIDTH-1 downto 0);
+  type snap_regs_t is array (0 to SNAP_NUM_RESERVED_SPACE/4-1) of std_logic_vector(C_AXI_CTRL_REG_DATA_WIDTH-1 downto 0);
   signal snap_regs                   : snap_regs_t := (others => (others => '0'));
 
   signal fletcher_s_axi_awaddr    : std_logic_vector(31 downto 0);
@@ -242,7 +236,7 @@ architecture Behavorial of action_fletcher is
   signal snap_s_axi_rdata       : std_logic_vector(C_AXI_CTRL_REG_DATA_WIDTH-1 downto 0);
   signal snap_s_axi_rresp       : std_logic_vector(1 downto 0);
 
-  signal snap_read_address      : natural range 0 to SNAP_NUM_REGS-1;
+  signal snap_read_address      : natural range 0 to SNAP_NUM_RESERVED_SPACE/4-1;
 
   signal read_valid             : std_logic;
   signal write_processed        : std_logic;
@@ -301,23 +295,27 @@ begin
   s_axi_host_mem_rid      <= axi_host_mem_rid;
   s_axi_host_mem_ruser    <= axi_host_mem_ruser;
 
+
   ----------------------------------------------------------------------
   -- AXI Lite Slave inputs
   ----------------------------------------------------------------------
-  fletcher_space_r                <= axi_ctrl_reg_araddr(9);
-  fletcher_space_w                <= axi_ctrl_reg_awaddr(9);
+  fletcher_space_r                <= axi_ctrl_reg_araddr(21);
+  fletcher_space_w                <= axi_ctrl_reg_awaddr(21);
 
   -- Fletcher inputs
-  fletcher_s_axi_awaddr(31 downto 9) <= (others => '0');
-  fletcher_s_axi_awaddr(8 downto 0)  <= axi_ctrl_reg_awaddr(8 downto 0);
+  -- https://opencapi.github.io/oc-accel-doc/deep-dive/registers/#hdl-design
+  -- SNAP available action address space is 22 bits.
+  -- We use the uppermost bit to signal Flether MMIO address space.
+  fletcher_s_axi_awaddr(31 downto 21) <= (others => '0');
+  fletcher_s_axi_awaddr(20 downto 0)  <= axi_ctrl_reg_awaddr(20 downto 0);
   fletcher_s_axi_awvalid             <= axi_ctrl_reg_awvalid and fletcher_space_w;
   fletcher_s_axi_wdata               <= axi_ctrl_reg_wdata;
   fletcher_s_axi_wstrb               <= axi_ctrl_reg_wstrb;
   fletcher_s_axi_wvalid              <= axi_ctrl_reg_wvalid;
   fletcher_s_axi_bready              <= axi_ctrl_reg_bready;
   fletcher_s_axi_arvalid             <= axi_ctrl_reg_arvalid and fletcher_space_r;
-  fletcher_s_axi_araddr(31 downto 9) <= (others => '0');
-  fletcher_s_axi_araddr(8 downto 0)  <= axi_ctrl_reg_araddr(8 downto 0);
+  fletcher_s_axi_araddr(31 downto 21) <= (others => '0');
+  fletcher_s_axi_araddr(20 downto 0)  <= axi_ctrl_reg_araddr(20 downto 0);
   fletcher_s_axi_rready              <= axi_ctrl_reg_rready;
 
   -- SNAP inputs
@@ -353,9 +351,14 @@ begin
   snap_regs(SNAP_REG_TYPE)      <= X"00000001";
   snap_regs(SNAP_REG_VERSION)   <= X"00000000";
   
+  -- Interrupt handle addresses
+  snap_regs(SNAP_REG_ISL)       <= X"00000000";
+  snap_regs(SNAP_REG_ISH)       <= X"00000000";
+  
   snap_regs(SNAP_REG_CONTROL)(1) <= '1'; -- dirty hack to always be done.
   snap_regs(SNAP_REG_CONTROL)(2) <= '1'; -- dirty hack to always be idle.
   snap_regs(SNAP_REG_CONTROL)(3) <= '1'; -- dirty hack to always be ready.
+  snap_regs(SNAP_REG_CONTROL)(31 downto 4) <= (others => '0'); -- reserved, just set to 0
 
   -- Ready
   snap_s_axi_arready            <= not read_valid;
@@ -393,16 +396,13 @@ begin
 
   -- Writes
   write_proc: process(action_clk) is
-    variable address            : natural range 0 to SNAP_NUM_REGS-1;
+    variable address            : natural range 0 to SNAP_NUM_RESERVED_SPACE/4-1;
   begin
     if rising_edge(action_clk) then
       address                   := int(snap_s_axi_araddr(SNAP_ADDR_WIDTH-1 downto 2));
       if write_valid = '1' then
         case address is
-          when SNAP_REG_CONTEXT_ID       => snap_regs(SNAP_REG_CONTEXT_ID)       <= snap_s_axi_wdata;
           when SNAP_REG_CONTROL          => snap_regs(SNAP_REG_CONTROL)(0)       <= snap_s_axi_wdata(0); -- start
-                                            snap_regs(SNAP_REG_CONTROL)(7)       <= snap_s_axi_wdata(7); -- auto restart
-                                            
           when SNAP_REG_INTERRUPT_ENABLE => snap_regs(SNAP_REG_INTERRUPT_ENABLE) <= snap_s_axi_wdata;
           when others                    => -- do nothing to read only regs
         end case;
@@ -410,7 +410,10 @@ begin
 
       -- Reset
       if action_rst_n = '0' then
-        snap_regs(SNAP_REG_CONTROL) <= (others => '0');
+        -- Note that this start flag is actually ignored.
+        -- We use our own start register inside the generated vhdmmio module
+        snap_regs(SNAP_REG_CONTROL)(0)       <= '0';
+        snap_regs(SNAP_REG_INTERRUPT_ENABLE) <= (others => '0');
       end if;
     end if;
   end process;
