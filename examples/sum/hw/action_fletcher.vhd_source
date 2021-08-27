@@ -439,10 +439,7 @@ begin
   -- AXI Host Memory
   ----------------------------------------------------------------------
   -- Read channel defaults:
-  -- ARSIZE must be set to 512 bits
-  s_axi_host_mem_arsize           <= "110"; -- 512 bit beats
   s_axi_host_mem_arburst          <= "01"; -- incremental
-  
   s_axi_host_mem_arid             <= (others => '0');
   s_axi_host_mem_arlock           <= (others => '0');
   s_axi_host_mem_arcache          <= "0010";
@@ -451,16 +448,26 @@ begin
   s_axi_host_mem_aruser           <= (others => '0');
   
   -- Write channel defaults:
-  -- AWSIZE must be set to 512 bits
-  s_axi_host_mem_awsize           <= "110"; -- 512 bit beats
   s_axi_host_mem_awburst          <= "01"; -- incremental
-  
   s_axi_host_mem_awid             <= (others => '0');
   s_axi_host_mem_awlock           <= (others => '0');
   s_axi_host_mem_awcache          <= "0010";
   s_axi_host_mem_awprot           <= "000";
   s_axi_host_mem_awqos            <= x"0";
   s_axi_host_mem_awuser           <= (others => '0');
+
+  -- This must be coordinated with the oc-accel configuration (when using 512, enable the corresponding option)
+  axi_512_dwidth: if C_AXI_HOST_MEM_DATA_WIDTH = 512 generate
+    s_axi_host_mem_arsize           <= "110"; -- 512 bit beats
+    s_axi_host_mem_awsize           <= "110"; -- 512 bit beats
+  end generate;
+  axi_1024_dwidth: if C_AXI_HOST_MEM_DATA_WIDTH = 1024 generate
+    s_axi_host_mem_arsize           <= "111"; -- 1024 bit beats
+    s_axi_host_mem_awsize           <= "111"; -- 1024 bit beats
+  end generate;
+  assert C_AXI_HOST_MEM_DATA_WIDTH = 512 or C_AXI_HOST_MEM_DATA_WIDTH = 1024 
+  report "oc-accel only supports toplevel datawidths of 1024 or 512."
+  severity failure;
 
   ----------------------------------------------------------------------
   -- Fletcher top level
