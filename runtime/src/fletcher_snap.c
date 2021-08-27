@@ -109,7 +109,11 @@ fstatus_t platformReadMMIO(uint64_t offset, uint32_t *value) {
   if (snap_state.sim && offset == FLETCHER_REG_STATUS) {
     sleep(2);
   }
-  snap_action_read32(snap_state.card_handle, FLETCHER_SNAP_ACTION_REG_OFFSET + 4*offset, value);
+  int rc = snap_action_read32(snap_state.card_handle, FLETCHER_SNAP_ACTION_REG_OFFSET + 4*offset, value);
+  if (rc != SNAP_OK) {
+    fprintf(stderr, "[FLETCHER_SNAP] Error while reading MMIO register: %d\n", rc);
+    return FLETCHER_STATUS_ERROR;
+  }
   debug_print("[FLETCHER_SNAP] Reading MMIO register.       %04lu => 0x%08X\n", offset, *value);
   return FLETCHER_STATUS_OK;
 }
