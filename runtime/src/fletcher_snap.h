@@ -32,7 +32,7 @@
 
 #define debug_print(...) do { if (ENABLE_DEBUG_PRINT) fprintf(stderr, __VA_ARGS__); } while (0)
 
-#define FLETCHER_PLATFORM_NAME "snap"
+#define FLETCHER_PLATFORM_NAME "oc-accel"
 
 #define FLETCHER_SNAP_ACTION_REG_OFFSET (1<<21)
 #define FLETCHER_SNAP_DEVICE_ALIGNMENT 4096
