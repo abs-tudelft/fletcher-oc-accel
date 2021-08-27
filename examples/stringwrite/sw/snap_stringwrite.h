@@ -45,7 +45,7 @@
 #define ACTION_DEST_HIGH        0x40
 #define ACTION_CNT              0x44    /* Count Register or # of 512 Byte Blocks for NVME */
 
-#define SNAP_OFFSET     0x200
+#define SNAP_OFFSET     (1<<21)
 
 /* Registers */
 #define REG_CONTROL      SNAP_OFFSET + 4*0
