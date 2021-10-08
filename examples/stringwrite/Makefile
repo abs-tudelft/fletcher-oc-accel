@@ -15,6 +15,7 @@
 #
 
 FLETCHER_DIR=$(shell pwd)/../../fletcher
+FLETCHER_OCACCEL_DIR=$(shell pwd)/../..
 subdirs += sw
 
 all: $(subdirs)
@@ -22,6 +23,12 @@ all: $(subdirs)
 .PHONY: $(subdirs) hw
 
 hw:
+	echo "INFO: Patching Fletcher to ignore oc-accel's strange reset behavior in simulation..."
+	#run some bash code to deal with the situation where the patch is already applied
+	cd $(FLETCHER_DIR) && patch -i $(FLETCHER_OCACCEL_DIR)/fletcher_fail2warn.patch -p1 -f; \
+	retcode=$?; \
+	[[ $$retCode -gt 1 ]] && exit $$retCode; \
+	exit 0
 	echo "INFO: Generating Fletcher stringwrite example design..."
 	rm -f ./hw/fletcher
 	rm -f ./hw/stringwrite

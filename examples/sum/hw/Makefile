@@ -25,7 +25,13 @@ all: config softlinks
 
 
 softlinks:
-	echo "INFO: Creating Fletcher hardware symlinks."
+	echo "INFO: Patching Fletcher to ignore oc-accel's strange reset behavior in simulation..."
+	#run some bash code to deal with the situation where the patch is already applied
+	cd $(FLETCHER_DIR) && patch -i $(FLETCHER_OCACCEL_DIR)/fletcher_fail2warn.patch -p1 -f; \
+	retcode=$?; \
+	[[ $$retCode -gt 1 ]] && exit $$retCode; \
+	exit 0
+	echo "INFO: Generating Fletcher sum example design..."
 	rm -f ./fletcher
 	rm -f ./sum
 	ln -fs $(FLETCHER_DIR)/hardware ./fletcher
