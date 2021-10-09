@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 
-project(fletcher_snap VERSION 0.0.0 LANGUAGES C CXX)
+project(fletcher_oc-accel VERSION 0.0.0 LANGUAGES C CXX)
 
 include(FetchContent)
 FetchContent_Declare(cmake-modules
@@ -18,12 +18,12 @@ if(SNAP)
   set_target_properties(snap PROPERTIES IMPORTED_LOCATION ${SNAP})
   target_include_directories(snap INTERFACE "$ENV{SNAP_ROOT}/software/include")
 else()
-  message(FATAL_ERROR "SNAP not found. Please source snap_path.sh in the Snap repository...")
+  message(FATAL_ERROR "SNAP not found. Please source snap_path.sh in the oc-accel repository...")
 endif()
 
 add_subdirectory(../fletcher/common/c c)
 
-option(SNAP_SIM "Build Snap run-time in simulation mode." ON)
+option(SNAP_SIM "Build oc-accel run-time in simulation mode." ON)
 if (SNAP_SIM)
   message("Building fletcher_snap for simulation.")
 else()
@@ -31,12 +31,12 @@ else()
 endif()
 
 add_compile_unit(
-  NAME fletcher::snap
+  NAME fletcher::oc-accel
   TYPE SHARED
   PRPS
     C_STANDARD 99
   SRCS
-    src/fletcher_snap.c
+    src/fletcher_oc-accel.c
   DEPS
     fletcher::c
     snap
