@@ -161,6 +161,17 @@ fstatus_t platformDeviceFree(da_t device_address) {
 fstatus_t platformPrepareHostBuffer(const uint8_t *host_source, da_t *device_destination, int64_t size, int *alloced) {
   *device_destination = (da_t) host_source;
   *alloced = 0;
+  if ((uint64_t)host_source & (FLETCHER_OCXL_DEVICE_ALIGNMENT - 1)) {
+    uint8_t *aligned_buffer;
+    posix_memalign((void**)(&aligned_buffer), FLETCHER_OCXL_DEVICE_ALIGNMENT, size);
+    memcpy(aligned_buffer, host_source, size);
+    debug_print(
+      "[FLETCHER_OCXL] Copied buffer to ensure alignment: orig buffer 0x%016lX --> new buffer 0x%016lX (%lu bytes) \n",
+      host_source,
+      (uint64_t) aligned_buffer,
+      size);
+      *device_destination = (da_t)aligned_buffer;
+  }
   debug_print("[FLETCHER_OCXL] Preparing buffer for device. [host] 0x%016lX --> 0x%016lX (%10lu bytes).\n",
               (unsigned long) host_source,
               (unsigned long) *device_destination,
