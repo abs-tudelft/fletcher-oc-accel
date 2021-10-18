@@ -38,7 +38,8 @@ softlinks:
 	ln -fs $(FLETCHER_DIR)/hardware ./fletcher
 	ln -fs $(FLETCHER_DIR)/examples/sum/hardware ./sum
 	cd ./sum && python3 generate-input.py && \
-fletchgen -n Sum -r recordbatch.rb -s memory.srec -l vhdl --axi
+LD_LIBRARY_PATH= fletchgen -n Sum -r recordbatch.rb -s memory.srec -l vhdl --axi
+#If a Xilinx toolchain is sourced (needed for oc-accel), its LD_LIBRARY_PATH can cause problems
 
 config:
 	$(info Call action_config.sh)
