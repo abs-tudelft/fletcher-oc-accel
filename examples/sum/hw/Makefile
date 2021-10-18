@@ -15,7 +15,7 @@
 #
 
 FLETCHER_DIR=$(shell pwd)/../../../fletcher
-FLETCHER_OCACCEL_DIR=$(shell pwd)/../..
+FLETCHER_OCACCEL_DIR=$(shell pwd)/../../..
 
 vhd_srcs=$(wildcard *.vhd_source)
 vhd_files=$(vhd_srcs:.vhd_source=.vhd)
